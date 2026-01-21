@@ -277,7 +277,7 @@ def get_pipeline(
     # the baseline, in this case, the training dataset from the data processing step, the dataset format, in this case,
     # a csv file with no headers, and the output path for the results of the data quality check.
 
-    checks_path = f"s3://{default_bucket}/{base_job_prefix}/checks/" + ExecutionVariables.PIPELINE_EXECUTION_ID.expr
+    checks_path = f"s3://{default_bucket}/{base_job_prefix}/checks/{ExecutionVariables.PIPELINE_EXECUTION_ID.to_string()}"
     checks_config_path = f"s3://{default_bucket}/{base_job_prefix}/checks/config"
     check_job_config = CheckJobConfig(
         role=role,
@@ -290,7 +290,7 @@ def get_pipeline(
     data_quality_check_config = DataQualityCheckConfig(
         baseline_dataset=step_process.properties.ProcessingOutputConfig.Outputs["train"].S3Output.S3Uri,
         dataset_format=DatasetFormat.csv(header=False, output_columns_position="START"),
-        output_s3_uri=os.path.join(checks_path, 'dataqualitycheckstep')
+        output_s3_uri=Join(on='/', values=['s3:/', default_bucket, base_job_prefix, "monitoring", ExecutionVariables.PIPELINE_EXECUTION_ID, 'dataqualitycheckstep'])
     )
 
     data_quality_check_step = QualityCheckStep(
@@ -303,7 +303,6 @@ def get_pipeline(
         supplied_baseline_constraints=supplied_baseline_constraints_data_quality,
         model_package_group_name=model_package_group_name
     )
-
 
     #### Calculating the Data Bias
 
@@ -320,7 +319,7 @@ def get_pipeline(
 
     data_bias_data_config = DataConfig(
         s3_data_input_path=step_process.properties.ProcessingOutputConfig.Outputs["train"].S3Output.S3Uri,
-        s3_output_path=os.path.join(checks_path, 'databiascheckstep'),
+        s3_output_path=Join(on='/', values=['s3:/', default_bucket, base_job_prefix, "monitoring", ExecutionVariables.PIPELINE_EXECUTION_ID, 'databiascheckstep']),
         label=0,
         dataset_type="text/csv",
         s3_analysis_config_output_path=data_bias_analysis_cfg_output_path,
@@ -457,7 +456,7 @@ def get_pipeline(
     model_quality_check_config = ModelQualityCheckConfig(
         baseline_dataset=step_transform.properties.TransformOutput.S3OutputPath,
         dataset_format=DatasetFormat.csv(header=False),
-        output_s3_uri=os.path.join(checks_path, 'modelqualitycheckstep'),
+        output_s3_uri=Join(on='/', values=['s3:/', default_bucket, base_job_prefix, "monitoring", ExecutionVariables.PIPELINE_EXECUTION_ID, 'modelqualitycheckstep']),
         problem_type='Regression',
         inference_attribute='_c0',
         ground_truth_attribute='_c1'
@@ -530,7 +529,7 @@ def get_pipeline(
     model_explainability_analysis_cfg_output_path = os.path.join(checks_config_path, "modelexplainabilitycheckstep", "analysis_cfg")
     model_explainability_data_config = DataConfig(
         s3_data_input_path=step_process.properties.ProcessingOutputConfig.Outputs["train"].S3Output.S3Uri,
-        s3_output_path=os.path.join(checks_path, 'modelexplainabilitycheckstep'),
+        s3_output_path=Join(on='/', values=['s3:/', default_bucket, base_job_prefix, "monitoring", ExecutionVariables.PIPELINE_EXECUTION_ID, 'modelexplainabilitycheckstep']),
         s3_analysis_config_output_path=model_explainability_analysis_cfg_output_path,
         label=0,
         dataset_type="text/csv",
