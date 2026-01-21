@@ -773,11 +773,9 @@ def get_pipeline(
             step_train,
             step_create_model,
             step_transform,
-            [
-                model_quality_check_step,
-                model_bias_check_step,
-                model_explainability_check_step
-            ],
+            model_quality_check_step,
+            model_bias_check_step,
+            model_explainability_check_step,
             step_eval,
             step_cond
         ],
