@@ -481,7 +481,7 @@ def get_pipeline(
     model_bias_analysis_cfg_output_path = os.path.join(checks_config_path, "modelbiascheckstep", "analysis_cfg")
     model_bias_data_config = DataConfig(
         s3_data_input_path=step_process.properties.ProcessingOutputConfig.Outputs["train"].S3Output.S3Uri,
-        s3_output_path=os.path.join(checks_path, 'modelbiascheckstep'),
+        s3_output_path=Join(on='/', values=['s3:/', default_bucket, base_job_prefix, "monitoring", ExecutionVariables.PIPELINE_EXECUTION_ID, 'modelbiascheckstep']),
         s3_analysis_config_output_path=model_bias_analysis_cfg_output_path,
         label=0,
         dataset_type="text/csv",
