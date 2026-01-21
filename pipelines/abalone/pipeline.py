@@ -277,8 +277,11 @@ def get_pipeline(
     # the baseline, in this case, the training dataset from the data processing step, the dataset format, in this case,
     # a csv file with no headers, and the output path for the results of the data quality check.
 
-    checks_path = f"s3://{default_bucket}/{base_job_prefix}/checks/{ExecutionVariables.PIPELINE_EXECUTION_ID}"
     checks_config_path = f"s3://{default_bucket}/{base_job_prefix}/checks/config"
+    checks_path = Join(
+        on="/",
+        values=[f"s3://{default_bucket}", base_job_prefix, "checks", ExecutionVariables.PIPELINE_EXECUTION_ID]
+    )
     check_job_config = CheckJobConfig(
         role=role,
         instance_count=1,
